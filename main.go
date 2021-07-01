@@ -8,40 +8,82 @@ import (
 )
 
 // interface
-//   reference -> docker run <image> <command> <args>
-//   guntainer -> gun    run         <command> <args>
+//   reference -> docker run  <image>   <command> <args>
+//   guntainer -> gun    run  <newroot> <command> <args>
+//                       [1]  [2]       [3]
 
 func main() {
 	if len(os.Args) <= 1 {
-		log.Println("Gib command")
+		log.Fatalln("Gib command")
 		return
 	}
 
-	if os.Args[1] == "run" {
+	switch os.Args[1] {
+	case "run":
 		run()
+	case "child":
+		child()
+	default:
+		log.Fatalln("Unknown command", os.Args[1])
 	}
 }
 
 func run() {
-	log.Println("Hmm, running", os.Args[2:])
+	if len(os.Args) <= 2 {
+		log.Fatalln("Gib root FS")
+	}
+	if len(os.Args) <= 3 {
+		log.Fatalln("Gib command to run")
+	}
 
-	cmd := exec.Command(os.Args[2], os.Args[3:]...)
+	log.Println("Hmm, running", os.Args[3:])
+
+	cmd := exec.Command(os.Args[0], append([]string{"child"}, os.Args[2:]...)...)
+
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = []string{}
+
+	// namespaces
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWUSER,
+		Unshareflags: syscall.CLONE_NEWNS,
+		Credential: &syscall.Credential{
+			Uid: 0,
+			Gid: 0,
+		},
+		UidMappings: []syscall.SysProcIDMap{{
+			ContainerID: 0,
+			HostID: os.Geteuid(),
+			Size: 1,
+		}},
+		GidMappings: []syscall.SysProcIDMap{{
+			ContainerID: 0,
+			HostID: os.Getegid(),
+			Size: 1,
+		}},
+	}
+
+	err := cmd.Run()
+
+	if err != nil {
+		log.Fatalln("Error in running child command", err)
+	}
+}
+
+func child() {
+	cmd := exec.Command(os.Args[3], os.Args[4:]...)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	// namespaces
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
-		Unshareflags: syscall.CLONE_NEWNS,
-	}
-
-	// syscall.Sethostname([]byte("hmm"))
-	// syscall.Chroot("/something-nonexistent")
-	// syscall.Chdir("/")
-	// syscall.Mount("proc", "proc", "proc", 0, "")
-	// syscall.Unmount("/proc", 0)
+	syscall.Sethostname([]byte("hmm"))
+	syscall.Chroot(os.Args[2])
+	syscall.Chdir("/")
+	syscall.Mount("proc", "proc", "proc", 0, "")
+	syscall.Unmount("/proc", 0)
 
 	err := cmd.Run()
 
