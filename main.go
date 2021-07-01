@@ -2,9 +2,12 @@ package main
 
 import (
 	"log"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"syscall"
+
+	"github.com/mholt/archiver/v3"
 )
 
 // interface
@@ -28,6 +31,17 @@ func main() {
 	}
 }
 
+func setupNewRoot(archiveName string) (string, error) {
+	dname, err := ioutil.TempDir("", "guntainer")
+	if err != nil {
+		return "", err
+	}
+
+	err = archiver.Unarchive(archiveName, dname)
+
+	return dname, err
+}
+
 func run() {
 	if len(os.Args) <= 2 {
 		log.Fatalln("Gib root FS")
@@ -38,7 +52,15 @@ func run() {
 
 	log.Println("Hmm, running", os.Args[3:])
 
-	cmd := exec.Command(os.Args[0], append([]string{"child"}, os.Args[2:]...)...)
+	// extract root fs and do stuff
+	dname, err := setupNewRoot(os.Args[2])
+	if err != nil {
+		log.Fatalln("Error extracting root FS:", err)
+	}
+	// log.Println("Extracted root FS to", dname)
+	defer os.RemoveAll(dname)
+
+	cmd := exec.Command(os.Args[0], append([]string{"child", dname}, os.Args[3:]...)...)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -65,10 +87,10 @@ func run() {
 		}},
 	}
 
-	err := cmd.Run()
+	err = cmd.Run()
 
 	if err != nil {
-		log.Fatalln("Error in running child command", err)
+		log.Fatalln("Error in running child command:", err)
 	}
 }
 
@@ -87,7 +109,7 @@ func child() {
 	err := cmd.Run()
 
 	if err != nil {
-		log.Fatalln("Error in running command", err)
+		log.Fatalln("Error in running command:", err)
 	}
 
 	syscall.Unmount("/proc", 0)
