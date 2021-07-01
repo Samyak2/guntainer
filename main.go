@@ -83,11 +83,12 @@ func child() {
 	syscall.Chroot(os.Args[2])
 	syscall.Chdir("/")
 	syscall.Mount("proc", "proc", "proc", 0, "")
-	syscall.Unmount("/proc", 0)
 
 	err := cmd.Run()
 
 	if err != nil {
 		log.Fatalln("Error in running command", err)
 	}
+
+	syscall.Unmount("/proc", 0)
 }
