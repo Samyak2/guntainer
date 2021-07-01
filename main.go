@@ -90,7 +90,7 @@ func run() {
 	err = cmd.Run()
 
 	if err != nil {
-		log.Fatalln("Error in running child command:", err)
+		log.Fatalln("Error running child command:", err)
 	}
 }
 
@@ -101,16 +101,15 @@ func child() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	syscall.Sethostname([]byte("hmm"))
+	syscall.Sethostname([]byte("guntainer"))
 	syscall.Chroot(os.Args[2])
 	syscall.Chdir("/")
 	syscall.Mount("proc", "proc", "proc", 0, "")
+	defer syscall.Unmount("/proc", 0)
 
 	err := cmd.Run()
 
 	if err != nil {
-		log.Fatalln("Error in running command:", err)
+		log.Fatalln("Error running command:", err)
 	}
-
-	syscall.Unmount("/proc", 0)
 }
