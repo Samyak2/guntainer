@@ -8,7 +8,8 @@ import (
 	"strings"
 
 	"github.com/Samyak2/guntainer/gunfile"
-	"github.com/mholt/archiver/v3"
+	"github.com/Samyak2/guntainer/guntar"
+	// "github.com/mholt/archiver/v3"
 )
 
 func build() {
@@ -51,7 +52,8 @@ func build() {
 		log.Fatalln(err)
 	}
 
-	err = archiver.Archive([]string{dname}, outputPath)
+	// err = archiver.Archive([]string{dname}, outputPath)
+	err = guntar.ArchiveDirectory(dname, outputPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
