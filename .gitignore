@@ -1,0 +1,3 @@
+# ignore images and containers
+*.tar.gz
+*.tar

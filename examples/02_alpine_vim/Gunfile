@@ -1,0 +1,7 @@
+Using "alpine-minirootfs-3.14.0-x86_64.tar.gz"
+
+Exec "echo 'nameserver 8.8.8.8' > /etc/resolv.conf"
+
+Exec "apk update"
+
+Exec "apk add vim"
