@@ -15,22 +15,23 @@ go install github.com/Samyak2/guntainer@latest
 ```
 (ensure `GOBIN` is in path)
 
-To run a container:
-```
-guntainer run <archive_of_root_FS> <command_to_run> <args_for_command>...
-```
 
- - `archive_of_root_FS` is an archive (tar, zip, etc.) of a root filesystem which will be `chroot`ed into
- - `command_to_run` is a program *inside* the container root FS that is run (note that `PATH` is not set unless you execute a shell)
- - `args_for_command` are arguments for the program (everything after the `command_to_run` is passed directly to the program)
-
-
-To build a new image, first make a [`Gunfile`](#building-images) and then use:
+Confirm that the installation succeeded.
 ```
-guntainer build Gunfile <path_to_new_image>
+guntainer help
 ```
 
-Where `Gunfile` can be replaced with the path to the Gunfile and `path_to_new_image` is the path where the generated image is saved (as a tar file)
+To run a container image, use the `run` subcommand.
+See [here](#run-examples) for more information and examples.
+```
+guntainer run --help
+```
+
+To build a container image using a `Gunfile`, use the `build` subcommand.
+See [here](#building-images) for more information and examples.
+```
+guntainer build --help
+```
 
 ## Building images
 
@@ -45,7 +46,7 @@ More examples can be found [here](./examples/).
 
 To build the image from [example_02](./examples/02_alpine_vim/), we can use:
 ```
-guntainer build examples/02_alpine_vim/Gunfile example_02.tar
+guntainer build example_02.tar examples/02_alpine_vim/Gunfile
 ```
 
 This will generate an `example_02.tar` which is the newly built image with `vim` installed. Run it using:
