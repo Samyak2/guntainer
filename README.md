@@ -101,13 +101,14 @@ Issues:
 
 ## TODO
 
- - [ ] Better CLI using [cobra](https://github.com/spf13/cobra)
+ - [x] Better CLI using [cobra](https://github.com/spf13/cobra)
  - [ ] Use cgroups for resource limits
  - [ ] (a bit ambitious) be OCI compliant
  - [ ] Fix Ubuntu issues
  - [x] Dockerfile equivalent
  - [ ] Download images from URL, like go's package management
  - [ ] Figure out how to store metadata along with the built image. Could do it similar to docker images (OCI) or do something more hacky.
+ - [ ] Optional logging - `-v` flag should enable more logs.
 
 ## Resources
 

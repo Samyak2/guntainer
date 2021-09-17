@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"fmt"
@@ -9,23 +9,12 @@ import (
 
 	"github.com/Samyak2/guntainer/gunfile"
 	"github.com/Samyak2/guntainer/guntar"
-	// "github.com/mholt/archiver/v3"
 )
 
-func build() {
-	if len(os.Args) <= 2 {
-		log.Fatalln("Gib Gunfile")
-	}
-	if len(os.Args) <= 3 {
-		log.Fatalln("Gib output image path")
-	}
-
-	filename := os.Args[2]
-	outputPath := os.Args[3]
-
-	ast, err := gunfile.ParseGunfile(filename)
+func Build(gunfileName string, outputPath string) {
+	ast, err := gunfile.ParseGunfile(gunfileName)
 	if err != nil {
-		log.Fatalln("Error in reading Gunfile:", err)
+		log.Fatalln("Error in reading Gunfile: ", err)
 	}
 	gunfile.PreprocessAST(ast)
 
@@ -52,7 +41,6 @@ func build() {
 		log.Fatalln(err)
 	}
 
-	// err = archiver.Archive([]string{dname}, outputPath)
 	err = guntar.ArchiveDirectory(dname, outputPath)
 	if err != nil {
 		log.Fatalln(err)
